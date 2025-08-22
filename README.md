@@ -206,4 +206,7 @@ End a trip:
 
 ## Screenshots
 
-<img alt="img.png" height="400" src="img.png" width="270"/>
+<img alt="img.png" height="600" src="img.png" width="270"/>
+<img alt="img_1.png" height="600" src="img.png" width="270"/>
+<img alt="img_2.png" height="600" src="img.png" width="270"/>
+<img alt="img_3.png" height="600" src="img.png" width="270"/>
