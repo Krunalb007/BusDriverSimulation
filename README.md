@@ -206,7 +206,8 @@ End a trip:
 
 ## Screenshots
 
-<img alt="img.png" height="600" src="img.png" width="270"/>
-<img alt="img_1.png" height="600" src="img.png" width="270"/>
-<img alt="img_2.png" height="600" src="img.png" width="270"/>
-<img alt="img_3.png" height="600" src="img.png" width="270"/>
+<img width="270" height="600" alt="img" src="https://github.com/user-attachments/assets/3703777a-a4eb-4a27-a51e-63eb0f897021" />
+<img width="270" height="600" alt="img_1" src="https://github.com/user-attachments/assets/ead973e8-45b9-46c6-8a64-33b6b5520fda" />
+<img width="270" height="600" alt="img_2" src="https://github.com/user-attachments/assets/25792f95-0c5d-4a18-9ce9-8175a96b2a7a" />
+<img width="270" height="600" alt="img_3" src="https://github.com/user-attachments/assets/a32e25eb-8bc2-4108-9547-281e252a3008" />
+
