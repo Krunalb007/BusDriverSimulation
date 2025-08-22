@@ -10,12 +10,52 @@ import com.assignment.driver.domain.models.Trip
 import com.assignment.driver.domain.models.TripLocation
 import com.assignment.driver.domain.models.TripStatus
 
+/**
+ * Mapping extensions between Room entities and domain models.
+ *
+ * Goals:
+ * - Keep persistence-layer types (Room entities) decoupled from domain-layer models.
+ * - Provide a single source of truth for converting in both directions.
+ * - Make repository implementations concise and consistent.
+ *
+ * Notes:
+ * - TripEntity <-> Trip includes persisted stats (locationCount, firstPointAt, lastPointAt).
+ * - Ensure any schema/domain changes are reflected here to avoid stale mappings.
+ */
 
-fun DriverEntity.toDomain() = Driver(id, name, lastSyncedAt)
-fun Driver.toEntity() = DriverEntity(id, name, lastSyncedAt)
+/* ===== Driver ===== */
 
-fun RouteEntity.toDomain() = Route(id, name, startPoint, endPoint, lastUpdatedAt)
-fun Route.toEntity() = RouteEntity(id, name, startPoint, endPoint, lastUpdatedAt)
+fun DriverEntity.toDomain(): Driver = Driver(
+    id = id,
+    name = name,
+    lastSyncedAt = lastSyncedAt
+)
+
+fun Driver.toEntity(): DriverEntity = DriverEntity(
+    id = id,
+    name = name,
+    lastSyncedAt = lastSyncedAt
+)
+
+/* ===== Route ===== */
+
+fun RouteEntity.toDomain(): Route = Route(
+    id = id,
+    name = name,
+    startPoint = startPoint,
+    endPoint = endPoint,
+    lastUpdatedAt = lastUpdatedAt
+)
+
+fun Route.toEntity(): RouteEntity = RouteEntity(
+    id = id,
+    name = name,
+    startPoint = startPoint,
+    endPoint = endPoint,
+    lastUpdatedAt = lastUpdatedAt
+)
+
+/* ===== Trip ===== */
 
 fun TripEntity.toDomain(): Trip = Trip(
     id = id,
@@ -31,7 +71,7 @@ fun TripEntity.toDomain(): Trip = Trip(
     lastPointAt = lastPointAt
 )
 
-fun Trip.toEntity() = TripEntity(
+fun Trip.toEntity(): TripEntity = TripEntity(
     id = id,
     driverId = driverId,
     routeId = routeId,
@@ -39,10 +79,15 @@ fun Trip.toEntity() = TripEntity(
     endTime = endTime,
     status = status.name,
     createdAt = createdAt,
-    updatedAt = updatedAt
+    updatedAt = updatedAt,
+    locationCount = locationCount,
+    firstPointAt = firstPointAt,
+    lastPointAt = lastPointAt
 )
 
-fun TripLocationEntity.toDomain() = TripLocation(
+/* ===== TripLocation ===== */
+
+fun TripLocationEntity.toDomain(): TripLocation = TripLocation(
     id = id,
     tripId = tripId,
     timestamp = timestamp,
@@ -53,8 +98,8 @@ fun TripLocationEntity.toDomain() = TripLocation(
     bearing = bearing
 )
 
-fun TripLocation.toEntity() = TripLocationEntity(
-    id = id ?: 0,
+fun TripLocation.toEntity(): TripLocationEntity = TripLocationEntity(
+    id = id ?: 0L,
     tripId = tripId,
     timestamp = timestamp,
     lat = lat,

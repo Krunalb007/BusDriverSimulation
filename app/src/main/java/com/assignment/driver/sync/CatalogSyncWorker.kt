@@ -16,6 +16,22 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 
+/**
+ * CatalogSyncWorker
+ *
+ * One-time worker that refreshes lightweight catalog data (driver display name, routes)
+ * when connectivity is available.
+ *
+ * Triggers:
+ * - Typically enqueued on app start or after login.
+ *
+ * Constraints:
+ * - Requires NetworkType.CONNECTED to run.
+ *
+ * Behavior:
+ * - Calls RefreshCatalogUseCase to fetch and upsert latest driver/routes into Room.
+ * - Logs success; retries on failures.
+ */
 @HiltWorker
 class CatalogSyncWorker @AssistedInject constructor(
     @Assisted context: Context,
@@ -37,6 +53,9 @@ class CatalogSyncWorker @AssistedInject constructor(
     companion object {
         private const val UNIQUE_NAME = "catalog_sync_one_time"
 
+        /**
+         * Enqueue a constrained one-time refresh job.
+         */
         fun enqueue(context: Context) {
             val constraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

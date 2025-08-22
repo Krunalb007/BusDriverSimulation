@@ -7,7 +7,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.os.IBinder
-import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.assignment.driver.R
 import com.assignment.driver.data.repository.TripRepository
@@ -27,6 +26,30 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
+/**
+ * LocationTrackingService
+ *
+ * Foreground service responsible for continuous location capture during an active trip.
+ *
+ * Responsibilities:
+ * - Run in the foreground with a persistent notification while recording locations.
+ * - Subscribe to FusedLocationProviderClient updates at the configured interval/priority.
+ * - Persist each batch of locations into the local database via TripRepository.
+ *
+ * Lifecycle:
+ * - start(context, tripId): starts the service for a specific trip.
+ * - stop(context): stops the service and unsubscribes from location updates.
+ * - onCreate(): initializes location client, notification channel, and foreground mode.
+ * - onStartCommand(): receives the tripId and begins requesting location updates.
+ * - onDestroy(): cleans up the callback and coroutine scope.
+ *
+ * Permissions:
+ * - Requires foreground and background location permissions before being started.
+ * - If started without proper permissions, the service will stop itself gracefully.
+ *
+ * Error handling:
+ * - Exceptions while inserting points are caught and logged via Timber; service continues.
+ */
 @AndroidEntryPoint
 class LocationTrackingService : Service() {
 
@@ -35,12 +58,18 @@ class LocationTrackingService : Service() {
         const val NOTIF_ID = 1001
         const val EXTRA_TRIP_ID = "extra_trip_id"
 
+        /**
+         * Start the foreground service for the given trip.
+         */
         fun start(context: Context, tripId: String) {
             val i = Intent(context, LocationTrackingService::class.java)
                 .putExtra(EXTRA_TRIP_ID, tripId)
             context.startForegroundService(i)
         }
 
+        /**
+         * Stop the foreground service if running.
+         */
         fun stop(context: Context) {
             val i = Intent(context, LocationTrackingService::class.java)
             context.stopService(i)
@@ -48,6 +77,7 @@ class LocationTrackingService : Service() {
     }
 
     @Inject lateinit var tripRepo: TripRepository
+
     private lateinit var client: FusedLocationProviderClient
     private var serviceScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var tripId: String? = null
@@ -65,7 +95,6 @@ class LocationTrackingService : Service() {
         }
     }
 
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         tripId = intent?.getStringExtra(EXTRA_TRIP_ID)
         startLocationUpdates()
@@ -80,6 +109,9 @@ class LocationTrackingService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? = null
 
+    /**
+     * Create the notification channel for foreground operation.
+     */
     private fun createChannel() {
         val mgr = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         val channel = NotificationChannel(
@@ -90,6 +122,9 @@ class LocationTrackingService : Service() {
         mgr.createNotificationChannel(channel)
     }
 
+    /**
+     * Build the ongoing foreground notification.
+     */
     private fun buildNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_bus_24)
@@ -99,6 +134,9 @@ class LocationTrackingService : Service() {
             .build()
     }
 
+    /**
+     * Receives batched location updates and persists them as TripLocation rows.
+     */
     private val callback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult) {
             val tId = tripId ?: return
@@ -116,16 +154,17 @@ class LocationTrackingService : Service() {
             }
             serviceScope.launch {
                 try {
-
                     tripRepo.addLocations(points)
                 } catch (e: Throwable) {
-                    e.printStackTrace()
-                    // You can add logging with Timber
+                    Timber.w(e, "Failed to persist location batch")
                 }
             }
         }
     }
 
+    /**
+     * Begin requesting periodic location updates from FusedLocationProviderClient.
+     */
     private fun startLocationUpdates() {
         val request = LocationRequest.Builder(
             Priority.PRIORITY_BALANCED_POWER_ACCURACY,
@@ -133,13 +172,18 @@ class LocationTrackingService : Service() {
         )
             .setMinUpdateIntervalMillis(1_000L)
             .build()
+
         try {
             client.requestLocationUpdates(request, callback, mainLooper)
         } catch (e: SecurityException) {
-            e.printStackTrace()
+            Timber.w(e, "Missing location permission; stopping service")
+            stopSelf()
         }
     }
 
+    /**
+     * Stop receiving location updates.
+     */
     private fun stopLocationUpdates() {
         client.removeLocationUpdates(callback)
     }

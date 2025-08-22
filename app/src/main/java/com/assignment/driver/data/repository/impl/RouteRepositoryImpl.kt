@@ -9,6 +9,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
+/**
+ * RouteRepositoryImpl
+ *
+ * Purpose:
+ * - Implements RouteRepository using Room’s RouteDao.
+ * - Acts as the single source of truth for the route catalog locally.
+ *
+ * Responsibilities:
+ * - observeRoutes(): reactive stream of all routes (for UI lists).
+ * - getRoutes(): one-shot retrieval of all routes.
+ * - replaceAll(routes): upsert/replace the catalog with provided routes.
+ * - clear(): remove all routes (used for resets/tests).
+ *
+ * Notes:
+ * - Remote refresh flows should call replaceAll(...) to update the catalog.
+ * - Mapping to/from domain is kept in mappers for consistency.
+ */
 class RouteRepositoryImpl @Inject constructor(
     private val dao: RouteDao
 ) : RouteRepository {

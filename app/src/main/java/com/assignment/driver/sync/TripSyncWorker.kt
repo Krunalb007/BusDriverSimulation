@@ -22,6 +22,29 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
+/**
+ * TripSyncWorker
+ *
+ * Background worker that uploads completed trips when a network connection is available.
+ *
+ * Flow:
+ * - Query trips with status COMPLETED.
+ * - For each, load stored TripLocation points and build an upload payload.
+ * - POST to the remote; on success:
+ *     - Mark trip as SYNCED (status only; do not alter endTime/stats).
+ *     - Clear local trip_locations for that trip to reclaim storage.
+ * - If any upload fails, return Result.retry() to back off and try later.
+ *
+ * Scheduling:
+ * - One-time: enqueue when a trip completes or app starts.
+ * - Periodic: ensure a periodic sync (e.g., every 15 minutes) for robustness.
+ *
+ * Constraints:
+ * - NetworkType.CONNECTED is required.
+ *
+ * Diagnostics:
+ * - Uses Timber for logging start, success, and failures.
+ */
 @HiltWorker
 class TripSyncWorker @AssistedInject constructor(
     @Assisted context: Context,
@@ -40,9 +63,10 @@ class TripSyncWorker @AssistedInject constructor(
                 val locations = tripRepo.getLocations(trip.id)
                 val payload = toUploadDto(trip, locations)
                 val res = tripsRemote.uploadTrip(payload)
+
                 if (res.isSuccess) {
                     tripRepo.updateTripStatus(trip.id, TripStatus.SYNCED)
-                     tripRepo.clearLocations(trip.id)
+                    tripRepo.clearLocations(trip.id)
                 } else {
                     Timber.w("Upload failed for trip ${trip.id}, retrying later")
                     return@withContext Result.retry()
@@ -64,6 +88,9 @@ class TripSyncWorker @AssistedInject constructor(
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()
 
+        /**
+         * Enqueue a one-time sync pass, replacing any pending one-time sync with the same key.
+         */
         fun enqueueOneTime(context: Context) {
             val request = OneTimeWorkRequestBuilder<TripSyncWorker>()
                 .setConstraints(connectedConstraints())
@@ -73,6 +100,10 @@ class TripSyncWorker @AssistedInject constructor(
                 .enqueueUniqueWork(UNIQUE_ONE_TIME, ExistingWorkPolicy.APPEND_OR_REPLACE, request)
         }
 
+        /**
+         * Ensure a periodic sync job exists (e.g., every 15 minutes).
+         * If it already exists, it is kept as-is.
+         */
         fun ensurePeriodic(context: Context) {
             val periodic = PeriodicWorkRequestBuilder<TripSyncWorker>(15, TimeUnit.MINUTES)
                 .setConstraints(connectedConstraints())
@@ -82,5 +113,4 @@ class TripSyncWorker @AssistedInject constructor(
                 .enqueueUniquePeriodicWork(UNIQUE_PERIODIC, ExistingPeriodicWorkPolicy.KEEP, periodic)
         }
     }
-
 }
