@@ -129,7 +129,7 @@ Uninstall the app or clear data when changing schema.
 Requirements:
 - Android Studio Giraffe+ (Arctic Fox or newer recommended)
 - JDK 17
-- minSdk 29 (Android 10), targetSdk 34/35
+- minSdk 31 (Android 12), targetSdk 36 (Android 16)
 
 Steps:
 - Clone repository.
