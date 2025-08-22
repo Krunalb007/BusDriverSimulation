@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Bus Driver</string>
+    <string name="placeholder_for_login">Username (try: driver-001)</string>
+    <string name="username">Username</string>
+    <string name="logout">Logout</string>
+    <string name="login">Login</string>
+    <string name="routes">Routes</string>
+    <string name="recent_trips">Recent Trips</string>
+    <string name="end_trip">End Trip</string>
+</resources>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/itemTripCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp"
+    android:foreground="?attr/selectableItemBackground"
+    card_view:cardUseCompatPadding="true"
+    card_view:cardCornerRadius="8dp"
+    card_view:cardElevation="2dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tripTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Trip XXXX"
+            android:textStyle="bold"
+            android:textAppearance="?attr/textAppearanceBodyLarge"
+            android:textColor="@color/black" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tripSubtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Route: R-01 • Status: COMPLETED"
+            android:textAppearance="?attr/textAppearanceBodyMedium"
+            android:textColor="@color/black"
+            android:layout_marginTop="2dp"/>
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/tripTimes"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="2025-08-22 09:00 — 2025-08-22 09:45"
+            android:textAppearance="?attr/textAppearanceBodySmall"
+            android:textColor="@color/black"
+            android:layout_marginTop="2dp"/>
+
+    </LinearLayout>
+
+</androidx.cardview.widget.CardView>
