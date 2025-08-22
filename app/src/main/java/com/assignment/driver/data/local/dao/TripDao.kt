@@ -22,18 +22,7 @@ interface TripDao {
     @Query("SELECT * FROM trips WHERE id = :id LIMIT 1")
     suspend fun getById(id: String): TripEntity?
 
-    @Query(
-        """
-    UPDATE trips
-    SET status = :newStatus,
-        endTime = :endTime,
-        updatedAt = :updatedAt,
-        locationCount = :locationCount,
-        firstPointAt = :firstPointAt,
-        lastPointAt = :lastPointAt
-    WHERE id = :id
-"""
-    )
+    @Query("UPDATE trips SET status = :newStatus, endTime = :endTime, updatedAt = :updatedAt, locationCount = :locationCount, firstPointAt = :firstPointAt, lastPointAt = :lastPointAt WHERE id = :id")
     suspend fun markStatus(
         id: String,
         newStatus: String,
