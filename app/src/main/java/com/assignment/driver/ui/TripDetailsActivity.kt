@@ -3,8 +3,9 @@ package com.assignment.driver.ui
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.assignment.driver.databinding.ActivityTripDetailsBinding
+import com.assignment.driver.R
 import com.assignment.driver.data.repository.TripRepository
+import com.assignment.driver.databinding.ActivityTripDetailsBinding
 import com.assignment.driver.util.formatTs
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,7 @@ class TripDetailsActivity : AppCompatActivity() {
             val (first, last) = tripRepo.getLocationTimeRange(tripId)
             withContext(Dispatchers.Main) {
                 if (trip == null) {
-                    binding.summary.text = "Trip not found"
+                    binding.summary.text = getString(R.string.trip_not_found)
                 } else {
                     binding.summary.text = buildString {
                         appendLine("Trip ID: ${trip.id}")

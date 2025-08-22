@@ -52,18 +52,11 @@ class MainViewModel @Inject constructor(
     val events = _events.receiveAsFlow()
 
     private val _recentTrips = MutableStateFlow<List<Trip>>(emptyList())
-    val recentTrips = _recentTrips.asStateFlow()
+    val recentTrips: StateFlow<List<Trip>> = _recentTrips
 
     init {
-        // Load once; you can also refresh on lifecycle events
         viewModelScope.launch {
-            _recentTrips.value = runCatching { getRecentTrips.get(20) }.getOrDefault(emptyList())
-        }
-    }
-
-    fun refreshRecentTrips() {
-        viewModelScope.launch {
-            _recentTrips.value = runCatching { getRecentTrips.get(20) }.getOrDefault(emptyList())
+            getRecentTrips.get(20).collect { _recentTrips.value = it }
         }
     }
 
@@ -99,7 +92,6 @@ class MainViewModel @Inject constructor(
             }
             val trip = activeTrip.value ?: return@launch
             endTrip.end(trip.id)
-            refreshRecentTrips()
             _events.send(UiEvent.StopService)
         }
     }

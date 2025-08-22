@@ -72,8 +72,8 @@ class TripRepositoryImpl @Inject constructor(
         // and call it here
     }
 
-    override suspend fun getRecentTrips(limit: Int): List<Trip> =
-        tripDao.getRecentTrips(limit).map { it.toDomain() }
+    override fun observeRecentTrips(limit: Int): Flow<List<Trip>> =
+        tripDao.observeRecentTrips(limit).map { list -> list.map { it.toDomain() } }
 
     override suspend fun getLocationCount(tripId: String): Int =
         locDao.getByTripId(tripId).size // or prefer DAO COUNT query if added

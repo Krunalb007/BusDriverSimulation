@@ -16,7 +16,7 @@ interface TripRepository {
     suspend fun addLocations(points: List<TripLocation>)
     suspend fun getLocations(tripId: String): List<TripLocation>
     suspend fun clearLocations(tripId: String)
-    suspend fun getRecentTrips(limit: Int = 20): List<Trip>
+    fun observeRecentTrips(limit: Int = 20): Flow<List<Trip>>
     suspend fun getLocationCount(tripId: String): Int
     suspend fun getLocationTimeRange(tripId: String): Pair<Long?, Long?>
 

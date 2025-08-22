@@ -62,5 +62,6 @@ interface TripDao {
     @Query("SELECT MAX(timestamp) FROM trip_locations WHERE tripId = :tripId")
     suspend fun getLastTimestamp(tripId: String): Long?
 
-
+    @Query("SELECT * FROM trips ORDER BY createdAt DESC LIMIT :limit")
+    fun observeRecentTrips(limit: Int): Flow<List<TripEntity>>
 }

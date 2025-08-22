@@ -5,6 +5,6 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "session")
 data class SessionEntity(
-    @PrimaryKey val key: String = "current",
+    @PrimaryKey val sessionKey: String = "current",
     val driverId: String?
 )

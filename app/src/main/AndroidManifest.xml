@@ -20,7 +20,8 @@
         android:label="Bus Driver"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.BusDriver">
+        android:theme="@style/Theme.BusDriver"
+        tools:ignore="RemoveWorkManagerInitializer">
 
         <activity
             android:name=".ui.MainActivity"

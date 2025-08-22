@@ -1,20 +1,24 @@
 package com.assignment.driver.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.View
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getColor
 import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DiffUtil
@@ -24,12 +28,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.assignment.driver.R
 import com.assignment.driver.databinding.ActivityMainBinding
 import com.assignment.driver.domain.models.Route
+import com.assignment.driver.domain.models.Trip
+import com.assignment.driver.domain.models.TripStatus
 import com.assignment.driver.domain.usecases.CancelTripSyncUseCase
 import com.assignment.driver.service.LocationTrackingService
 import com.assignment.driver.util.PermissionHelper
 import com.assignment.driver.util.formatTs
 import com.example.busdriver.ui.MainViewModel
 import com.example.busdriver.ui.UiEvent
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textview.MaterialTextView
 import dagger.hilt.android.AndroidEntryPoint
@@ -151,6 +158,9 @@ class MainActivity : AppCompatActivity() {
             vm.activeTrip.collectLatest { trip ->
                 binding.activeTripStatus.text = if (trip == null) "" else "Active trip: ${trip.id}"
                 binding.endTripBtn.isEnabled = trip != null
+                if(trip==null){
+                    binding.activeTripStatus.text=resources.getString(R.string.no_active_trips)
+                }
             }
         }
 
@@ -172,7 +182,9 @@ class MainActivity : AppCompatActivity() {
                     is UiEvent.StartService -> startTripWithMandatoryPermissions(event.tripId)
                     UiEvent.StopService -> {
                         LocationTrackingService.stop(this@MainActivity)
-                        vm.refreshRecentTrips()
+                        binding.recentTripsList.post {
+                            binding.recentTripsList.scrollToPosition(0)
+                        }
                     }
                 }
             }
@@ -264,7 +276,6 @@ class MainActivity : AppCompatActivity() {
             binding.endTripBtn.visibility = GONE
         }
     }
-
 }
 
 private class RoutesAdapter(
@@ -293,13 +304,13 @@ private class RouteVH(
 }
 
 private class RecentTripsAdapter(
-    private val onClick: (com.assignment.driver.domain.models.Trip) -> Unit
-) : ListAdapter<com.assignment.driver.domain.models.Trip, RecentTripVH>(Diff()) {
+    private val onClick: (Trip) -> Unit
+) : ListAdapter<Trip, RecentTripVH>(Diff()) {
 
-    override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): RecentTripVH {
-        val v = android.view.LayoutInflater.from(parent.context)
-            .inflate(com.assignment.driver.R.layout.item_trip, parent, false)
-        return RecentTripVH(v as android.view.View, onClick)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecentTripVH {
+        val v = LayoutInflater.from(parent.context)
+            .inflate(R.layout.item_trip, parent, false)
+        return RecentTripVH(parent.context,v as View, onClick)
     }
 
     override fun onBindViewHolder(holder: RecentTripVH, position: Int) =
@@ -307,19 +318,33 @@ private class RecentTripsAdapter(
 }
 
 private class RecentTripVH(
-    itemView: android.view.View,
-    private val onClick: (com.assignment.driver.domain.models.Trip) -> Unit
+    private val context: Context,
+    itemView: View,
+    private val onClick: (Trip) -> Unit
 ) : RecyclerView.ViewHolder(itemView) {
 
-    private val title = itemView.findViewById<TextView>(R.id.tripTitle)
-    private val subtitle = itemView.findViewById<TextView>(R.id.tripSubtitle)
-    private val times = itemView.findViewById<TextView>(R.id.tripTimes)
+    private val title = itemView.findViewById<MaterialTextView>(R.id.tripTitle)
+    private val subtitle = itemView.findViewById<MaterialTextView>(R.id.tripSubtitle)
+    private val times = itemView.findViewById<MaterialTextView>(R.id.tripTimes)
+    private val card = itemView.findViewById<LinearLayout>(R.id.itemTripCard)
 
     @SuppressLint("SetTextI18n")
-    fun bind(item: com.assignment.driver.domain.models.Trip) {
+    fun bind(item: Trip) {
         // Title can be Trip ID (shortened) or Route ID; we keep it simple
         title.text = "Trip ${item.id.take(8)}"
         subtitle.text = "Route: ${item.routeId} • Status: ${item.status.name}"
+
+        when (item.status.name) {
+            TripStatus.COMPLETED.name -> {
+                card.setBackgroundColor(getColor(context,R.color.completed))
+            }
+            TripStatus.ACTIVE.name -> {
+                card.setBackgroundColor(getColor(context,R.color.ongoing))
+            }
+            TripStatus.SYNCED.name -> {
+                card.setBackgroundColor(getColor(context,R.color.synced))
+            }
+        }
 
         val s = formatTs(item.startTime)
         val e = item.endTime?.let { formatTs(it) } ?: "-"
@@ -329,10 +354,10 @@ private class RecentTripVH(
     }
 }
 
-private class Diff : DiffUtil.ItemCallback<com.assignment.driver.domain.models.Trip>() {
-    override fun areItemsTheSame(oldItem: com.assignment.driver.domain.models.Trip, newItem: com.assignment.driver.domain.models.Trip) =
+private class Diff : DiffUtil.ItemCallback<Trip>() {
+    override fun areItemsTheSame(oldItem: Trip, newItem: Trip) =
         oldItem.id == newItem.id
-    override fun areContentsTheSame(oldItem: com.assignment.driver.domain.models.Trip, newItem: com.assignment.driver.domain.models.Trip) =
+    override fun areContentsTheSame(oldItem: Trip, newItem: Trip) =
         oldItem == newItem
 }
 

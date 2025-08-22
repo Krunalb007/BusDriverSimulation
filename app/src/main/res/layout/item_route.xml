@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginTop="8dp"
     android:layout_marginBottom="8dp"
+    card_view:strokeWidth="0dp"
+    card_view:cardBackgroundColor="#1A690375"
+    card_view:cardPreventCornerOverlap="true"
     android:foreground="?attr/selectableItemBackground"
     card_view:cardUseCompatPadding="true"
-    card_view:cardCornerRadius="4dp"
-    card_view:cardElevation="1dp">
+    card_view:cardCornerRadius="14dp">
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/routeName"
         android:gravity="center"
+        android:textStyle="bold"
+        android:textSize="12sp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
         android:textColor="@color/black"
         android:textAppearance="?attr/textAppearanceBodyLarge"/>
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

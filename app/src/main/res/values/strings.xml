@@ -7,4 +7,6 @@
     <string name="routes">Routes</string>
     <string name="recent_trips">Recent Trips</string>
     <string name="end_trip">End Trip</string>
+    <string name="no_active_trips">No active trips</string>
+    <string name="trip_not_found">Trip not found</string>
 </resources>

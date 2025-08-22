@@ -14,9 +14,9 @@ interface SessionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsert(session: SessionEntity)
 
-    @Query("SELECT * FROM session WHERE key = 'current' LIMIT 1")
+    @Query("SELECT * FROM session WHERE sessionKey = 'current' LIMIT 1")
     suspend fun get(): SessionEntity?
 
-    @Query("SELECT * FROM session WHERE key = 'current' LIMIT 1")
+    @Query("SELECT * FROM session WHERE sessionKey = 'current' LIMIT 1")
     fun observe(): Flow<SessionEntity?>
 }
