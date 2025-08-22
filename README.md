@@ -203,3 +203,7 @@ End a trip:
 - Map preview and route matching.
 - Fine-grained location policy (adaptive sampling, battery saver).
 - Detailed error surfaces for sync and permissions.
+
+## Screenshots
+
+<img alt="img.png" height="400" src="img.png" width="270"/>
